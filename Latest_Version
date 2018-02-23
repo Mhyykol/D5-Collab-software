@@ -71,6 +71,8 @@ int main() {
 //pictorBacklightState(1);
 //	Welcome
 
+//LED PIN/////
+	PORTD |= _BV(5);
 for(;;)
 {
 ////////////////////Left Section statics/////////////////////////
@@ -232,8 +234,8 @@ for(;;)
 			}
 	}
 	
-	//////////DISCHARGE BATTERY IF REQUIRED///////////////////
-	if(required_supply > available_supply)
+	//////////DISCHARGE/CHARGE BATTERY IF REQUIRED///////////////////
+	if((required_supply > available_supply) && (Flag > 100))
 	{
 		Switch_Dis_Battery(1);
 		available_supply = available_supply + 1;
@@ -241,6 +243,7 @@ for(;;)
 	else if(required_supply < (available - 1))
 	{
 		Switch_Char_Battery(1);
+		Flag = Flag + 1;
 		available_supply = available_supply - 1;
 	}	
 	
