@@ -114,6 +114,7 @@ for(;;)
 	int Call;
 	int Call_2;
 	int Call_3;
+	int Flag;
 
 	init_adc2(0);
 	read_adc();
