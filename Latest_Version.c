@@ -26,10 +26,10 @@
 #define PICTOR_FASTMODE
 #include <avr/io.h>
 
-#include "../pictor.h"
-#include "../fonts/OryxB.h"
-#include "../fonts/Mash.h"
-#include "plug.h"
+#include "pictor.h"
+#include "OryxB.h"
+#include "Mash.h"
+//#include "plug.h"
 #include <util/delay.h>
 #include <math.h>
 #include <avr/interrupt.h>
@@ -61,8 +61,8 @@ int main() {
 	pictorDrawAll(BLACK);
 
 //SET PORT A FOR Inputs, pins 0-6 inputs, pin 7 output so doesnt affect system
-	DDRA = 0x80;
-	PORTA = 0x00;
+	DDRA = 0x00;
+	PORTA = 0xFF;
 //SET PORT D AS Output
 	DDRD = 0xFF;
 	PORTD = 0x00;
@@ -72,7 +72,8 @@ int main() {
 //	Welcome
 
 //LED PIN/////
-	PORTD |= _BV(5);
+	PORTD |= (1<<PD5);
+	
 for(;;)
 {
 ////////////////////Left Section statics/////////////////////////
@@ -109,8 +110,8 @@ for(;;)
 	int power;
 	double wind_capacity;
 	double pv_capacity;
-	double available supply;
-	double required supply;
+	double available_supply;
+	double required_supply;
 	int Call;
 	int Call_2;
 	int Call_3;
@@ -130,34 +131,35 @@ for(;;)
 /////////////////////////////////////////////////////////////////
 
 ////////////Check for load calls/////////////////////////////////
-	if(PINA4)
+	
+	if(PINA & (1<<PA4))
 		{
 			Call = 1;
 			Switch_load1(1);
 		}
-	else if(~PINA4)
+	else
 		{
 		    Call = 0;
 			Switch_load1(0);
 		}
 
-	if(PINA5)
+	if(PINA & (1<<PA5))
 		{
 			Call_2 = 1;
 			Switch_load2(1);
 		}
-	else if(~PINA5)
+	else
 		{
 			Call_2 = 0;
 			Switch_load2(0);
 		}
 
-	if(PINA6)
+	if(PINA & (1<<PA6))
 		{
 			Call_3 = 1;
 			Switch_load3(1);
 		}
-	else if(~PINA6)
+	else
 		{
 		    Call_3 = 0;
 			Switch_load3(0);
@@ -176,7 +178,7 @@ for(;;)
 	value = ADC;
 	pv_capacity = 3.3*(value/1024);
 
-	available_supply = wind_capacity + pv_capacity;
+	available_supply = 6;//wind_capacity + pv_capacity;
 
 	if(Call == 1)
 	{
@@ -239,14 +241,17 @@ for(;;)
 	if((required_supply > available_supply) && (Flag > 100))
 	{
 		Switch_Dis_Battery(1);
+		Switch_Char_Battery(0);
 		available_supply = available_supply + 1;
+		Flag = Flag - 1;
 	}
-	else if(required_supply < (available - 1))
+	else if(required_supply < (available_supply - 1))
 	{
 		Switch_Char_Battery(1);
+		Switch_Dis_Battery(0);
 		Flag = Flag + 1;
 		available_supply = available_supply - 1;
-	}	
+	}
 	
 	///////////SUPPLY MAINS IF REQURED//////////////////////////
 	if(required_supply > available_supply)
@@ -269,11 +274,11 @@ void Switch_Char_Battery(const uint8_t State)
 {
 	if (State == 0)
 	{
-		PORTD &= ~_BV(0);
+		PORTD &= ~(1<<PD0);
 	}
 	if (State == 1)
 	{
-		PORTD |= _BV(0);
+		PORTD |= (1<<PD0);
 	}
 }
 
@@ -281,24 +286,24 @@ void Switch_Dis_Battery(const uint8_t State)
 {
 	if (State == 0)
 	{
-		PORTD &= ~_BV(1);
+		PORTD &= ~(1<<PD1);
 	}
 	if (State == 1)
 	{
-		PORTD |= _BV(1);
+		PORTD |= (1<<PD1);
 	}
 }
 
 
-void Switch_load1(const uint8_t State)
+void Switch_load1(uint8_t State)
 {
 	if (State == 0)
 	{
-		PORTD &= ~_BV(2);
+		PORTD &= ~(1<<PD2);
 	}
 	if (State == 1)
 	{
-		PORTD |= _BV(2);
+		PORTD |= (1<<PD2);
 	}
 }
 
@@ -306,11 +311,11 @@ void Switch_load2(const uint8_t State)
 {
 	if (State == 0)
 	{
-		PORTD &= ~_BV(3);
+		PORTD &= ~(1<<PD3);
 	}
 	if (State == 1)
 	{
-		PORTD |= _BV(3);
+		PORTD |= (1<<PD3);
 	}
 }
 
@@ -318,11 +323,11 @@ void Switch_load3(const uint8_t State)
 {
 	if (State == 0)
 	{
-		PORTD &= ~_BV(4);
+		PORTD &= ~(1<<PD4);
 	}
 	if (State == 1)
 	{
-		PORTD |= _BV(4);
+		PORTD |= (1<<PD4);
 	}
 }
 
@@ -468,4 +473,3 @@ uint16_t read_adc(void)
 	while(ADCSRA & _BV(ADSC));
 	return ADC;
 }
-
