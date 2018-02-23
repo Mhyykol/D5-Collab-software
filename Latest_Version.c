@@ -238,6 +238,14 @@ for(;;)
 	}
 	
 	//////////DISCHARGE/CHARGE BATTERY IF REQUIRED///////////////////
+	
+	/*do{
+			Switch_Dis_Battery(1);
+			Switch_Char_Battery(0);
+			available_supply = available_supply + 1;
+			Flag = Flag - 1;
+		} while ((required_supply > available_supply) && (Flag > 0))*/
+	
 	if((required_supply > available_supply) && (Flag > 100))
 	{
 		Switch_Dis_Battery(1);
