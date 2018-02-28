@@ -20,7 +20,9 @@
  *            | D    | PD2 | Switch load 1               |
  *            | D    | PD3 | Switch Load 2               |
  *            | D    | PD4 | Switch Load 3               |
- *            | D    | PD5 | LED OUTPUT                  |
+ *            | D    | PD5 | LED Output                  |
+ *			  | D    | PD6 | PWM Output                  |
+ *			  | D    | PD6 | inv PWM Output for mains    |
  */
 
 #define PICTOR_FASTMODE
@@ -132,7 +134,7 @@ for(;;)
 
 ////////////Check for load calls/////////////////////////////////
 	
-	if(PINA & (1<<PA4))
+	if((PINA & (1<<PA4)) && (8 <= time <= 22) )
 		{
 			Call = 1;
 			Switch_load1(1);
@@ -213,7 +215,7 @@ for(;;)
 		required_supply = 0;
 		if(Call_2 == 1)
 			{
-				required_supply = required_supply + 1.8;
+				required_supply = 1.8;
 				if(Call_3 == 1)
 				{
 					required_supply = required_supply + 1.4;
@@ -225,38 +227,41 @@ for(;;)
 			}
 		else if(Call_2 == 0)
 			{
-				required_supply = required_supply;
+				required_supply = 0;
 				if(Call_3 == 1)
 				{
-					required_supply = required_supply + 1.4;
+					required_supply = 1.4;
 				}
 				else if(Call_3 == 0)
 				{
-					required_supply = required_supply;
+					required_supply = 0;
 				}
 			}
 	}
 	
 	//////////DISCHARGE/CHARGE BATTERY IF REQUIRED///////////////////
-	
-	/*do{
+	/*
+		do{
 			Switch_Dis_Battery(1);
 			Switch_Char_Battery(0);
 			available_supply = available_supply + 1;
 			Flag = Flag - 1;
-		} while ((required_supply > available_supply) && (Flag > 0))*/
+		} while ((required_supply > available_supply) && (Flag > 0))
+	
+	*/
+	
 	
 	if((required_supply > available_supply) && (Flag > 100))
 	{
-		Switch_Dis_Battery(1);
 		Switch_Char_Battery(0);
+		Switch_Dis_Battery(1);
 		available_supply = available_supply + 1;
 		Flag = Flag - 1;
 	}
 	else if(required_supply < (available_supply - 1))
 	{
-		Switch_Char_Battery(1);
 		Switch_Dis_Battery(0);
+		Switch_Char_Battery(1);
 		Flag = Flag + 1;
 		available_supply = available_supply - 1;
 	}
@@ -266,7 +271,7 @@ for(;;)
 	{
 		Switch_Dis_Battery(0);
 		Switch_Char_Battery(0);
-		//Supply analogue input for Mains Power
+		pwm_duty(255);
 	}
 	else
 	{
@@ -274,7 +279,10 @@ for(;;)
 	}
 //////////////////////////////////////////////////////////////////////
 
-}
+	_delay_ms(5);
+	double time;
+	time = time + 0.005;
+//}
 	return 1;
 }
 ////////digital outputs///////////
