@@ -22,7 +22,7 @@
  *            | D    | PD4 | Switch Load 3               |
  *            | D    | PD5 | LED Output                  |
  *	      | D    | PD6 | PWM Output                  |
- *	      | D    | PD6 | inv PWM Output for mains    |
+ *	      | D    | PD7 | inv PWM Output for mains    |
  */
 
 #define PICTOR_FASTMODE
@@ -35,6 +35,8 @@
 #include <util/delay.h>
 #include <math.h>
 #include <avr/interrupt.h>
+#include <stdio.h>
+#include <time.h>
 
 #define PWM_DUTY_MAX 255
 #define ADCMAXREAD   1023
