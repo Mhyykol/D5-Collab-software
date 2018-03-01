@@ -122,12 +122,12 @@ for(;;)
 	init_adc2(0);
 	read_adc();
 	value = ADC;
-	busbar_voltage = 100*3.3*(value/1024);
+	busbar_voltage = 100*ADCREF_V*(value/1024);
 
 	init_adc2(1);
 	read_adc();
 	value = ADC;
-	busbar_current = 3.3*(value/1024);
+	busbar_current = ADCREF_V*(value/1024);
 
 	power = busbar_current * busbar_voltage;
 /////////////////////////////////////////////////////////////////
@@ -275,7 +275,7 @@ for(;;)
 ///////////SUPPLY MAINS IF REQURED//////////////////////////
 	if(required_supply > available_supply)
 	{
-		pwm_duty(255);
+		pwm_duty(PWM_DUTY_MAX);
 		available_supply = available_supply + 3;
 	}
 	else
