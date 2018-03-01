@@ -21,8 +21,8 @@
  *            | D    | PD3 | Switch Load 2               |
  *            | D    | PD4 | Switch Load 3               |
  *            | D    | PD5 | LED Output                  |
- *			  | D    | PD6 | PWM Output                  |
- *			  | D    | PD6 | inv PWM Output for mains    |
+ *	      | D    | PD6 | PWM Output                  |
+ *	      | D    | PD6 | inv PWM Output for mains    |
  */
 
 #define PICTOR_FASTMODE
