@@ -239,7 +239,7 @@ for(;;)
 			}
 	}
 	
-	//////////DISCHARGE/CHARGE BATTERY IF REQUIRED///////////////////
+//////////DISCHARGE/CHARGE BATTERY IF REQUIRED///////////////////
 	/*
 		do{
 			Switch_Dis_Battery(1);
@@ -265,18 +265,25 @@ for(;;)
 		Flag = Flag + 1;
 		available_supply = available_supply - 1;
 	}
-	
-	///////////SUPPLY MAINS IF REQURED//////////////////////////
-	if(required_supply > available_supply)
+	else
 	{
 		Switch_Dis_Battery(0);
 		Switch_Char_Battery(0);
+		available_supply = available_supply;
+	}
+	
+///////////SUPPLY MAINS IF REQURED//////////////////////////
+	if(required_supply > available_supply)
+	{
 		pwm_duty(255);
+		available_supply = available_supply + 3;
 	}
 	else
 	{
-		
+		pwm_duty(0);
+		available_supply = available_supply;
 	}
+	
 //////////////////////////////////////////////////////////////////////
 
 	_delay_ms(5);
