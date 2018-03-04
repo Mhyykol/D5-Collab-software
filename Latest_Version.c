@@ -295,15 +295,16 @@ for(;;)
 	return 1;
 }
 ////////digital outputs///////////
+
 void Switch_Char_Battery(const uint8_t State)
 {
 	if (State == 0)
 	{
-		PORTD &= ~(1<<PD0);
+		PORTD &= ~_BV(0);
 	}
 	if (State == 1)
 	{
-		PORTD |= (1<<PD0);
+		PORTD |= _BV(0);
 	}
 }
 
@@ -311,24 +312,26 @@ void Switch_Dis_Battery(const uint8_t State)
 {
 	if (State == 0)
 	{
-		PORTD &= ~(1<<PD1);
+		PORTD &= ~_BV(1);
 	}
 	if (State == 1)
 	{
-		PORTD |= (1<<PD1);
+		PORTD |= _BV(1);
 	}
 }
 
 
-void Switch_load1(uint8_t State)
+void Switch_load1(const uint8_t State)
 {
 	if (State == 0)
 	{
-		PORTD &= ~(1<<PD2);
+		PORTD &= ~_BV(2);
+		pictorDrawD(1, (point){250,53}, BLACK, BLACK, Mash, 4, 1);
 	}
 	if (State == 1)
 	{
-		PORTD |= (1<<PD2);
+		PORTD |= _BV(2);
+		pictorDrawD(1, (point){250,53}, CYAN, BLACK, Mash, 4, 1);
 	}
 }
 
@@ -336,11 +339,13 @@ void Switch_load2(const uint8_t State)
 {
 	if (State == 0)
 	{
-		PORTD &= ~(1<<PD3);
+		PORTD &= ~_BV(3);
+		pictorDrawD(2, (point){250,101}, BLACK, BLACK, Mash, 4, 1);
 	}
 	if (State == 1)
 	{
-		PORTD |= (1<<PD3);
+		PORTD |= _BV(3);
+		pictorDrawD(2, (point){250,101}, CYAN, BLACK, Mash, 4, 1);
 	}
 }
 
@@ -348,14 +353,16 @@ void Switch_load3(const uint8_t State)
 {
 	if (State == 0)
 	{
-		PORTD &= ~(1<<PD4);
+		PORTD &= ~_BV(4);
+		pictorDrawD(3, (point){250,149}, BLACK, BLACK, Mash, 4, 1);
 	}
 	if (State == 1)
 	{
-		PORTD |= (1<<PD4);
+		PORTD |= _BV(4);
+		pictorDrawD(3, (point){250,149}, CYAN, BLACK, Mash, 4, 1);
 	}
 }
-
+	
 ///////// Analogue output to testbed ////////////////
 void init_pwm(void)
 {
