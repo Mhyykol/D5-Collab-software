@@ -78,6 +78,21 @@ int main() {
 //LED PIN/////
 	PORTD |= (1<<PD5);
 	
+//Variable Declarations//
+	uint16_t value;
+	double busbar_voltage;
+	double busbar_current;
+	double power;
+	double wind_capacity;
+	double pv_capacity;
+	double available_supply;
+	double required_supply;
+	int Call;
+	int Call_2;
+	int Call_3;
+	int Flag;
+	double time;
+	
 for(;;)
 {
 ////////////////////Left Section statics/////////////////////////
@@ -108,18 +123,7 @@ for(;;)
 	//PORTB &= ~_BV(PB7);
 
 //////////////READ BUSBAR CURRENT AND VOLTAGE VALUES///////////////
-	uint16_t value;
-	double busbar_voltage;
-	double busbar_current;
-	int power;
-	double wind_capacity;
-	double pv_capacity;
-	double available_supply;
-	double required_supply;
-	int Call;
-	int Call_2;
-	int Call_3;
-	int Flag;
+	
 
 	init_adc2(0);
 	read_adc();
@@ -182,7 +186,7 @@ for(;;)
 	value = ADC;
 	pv_capacity = 3.3*(value/1024);
 
-	available_supply = 6;//wind_capacity + pv_capacity;
+	available_supply = wind_capacity + pv_capacity;
 
 	if(Call == 1)
 	{
@@ -253,7 +257,7 @@ for(;;)
 	*/
 	
 	
-	if((required_supply > available_supply) && (Flag > 100))
+	if((required_supply > available_supply) && (Flag > 1000))
 	{
 		Switch_Char_Battery(0);
 		Switch_Dis_Battery(1);
@@ -289,7 +293,6 @@ for(;;)
 //////////////////////////////////////////////////////////////////////
 
 	_delay_ms(5);
-	double time;
 	time = time + 0.005;
 //}
 	return 1;
