@@ -92,9 +92,7 @@ int main() {
 	int Call_3;
 	int Flag;
 	double time;
-	
-for(;;)
-{
+
 ////////////////////Left Section statics/////////////////////////
 //Draw value boxes
 	pictorDrawBox((point){2, 50}, (point){105, 78}, CYAN);
@@ -122,6 +120,8 @@ for(;;)
 	pictorDrawS(__TIMESTAMP__, (point){120, 231}, MAGENTA, BLACK, Mash,1);
 	//PORTB &= ~_BV(PB7);
 
+for(;;)
+{
 //////////////READ BUSBAR CURRENT AND VOLTAGE VALUES///////////////
 	
 
@@ -136,11 +136,28 @@ for(;;)
 	busbar_current = ADCREF_V*(value/1024);
 
 	power = busbar_current * busbar_voltage;
+	pictorDrawD(power, (point){5,53},PALE CYAN, BLACK, Mash, 3, 2);
+	pictorDrawS("W", (point){56,60}, MAGENTA, BLACK, Mash,2);
 /////////////////////////////////////////////////////////////////
 
+//////////////CHECK WIND & PV CAPACITY////////////////////////////
+
+	init_adc2(2);
+	read_adc();
+	value = ADC;
+	wind_capacity = 3.3*(value/1024);
+
+	init_adc2(3);
+	read_adc();
+	value = ADC;
+	pv_capacity = 3.3*(value/1024);
+
+	available_supply = wind_capacity + pv_capacity;
+	
+	
 ////////////Check for load calls/////////////////////////////////
 	
-	if((PINA & (1<<PA4)) && (8 <= time <= 22) )
+	if((PINA & (1<<PA4))
 		{
 			Call = 1;
 			Switch_load1(1);
@@ -169,24 +186,10 @@ for(;;)
 		}
 	else
 		{
-		    Call_3 = 0;
+		    	Call_3 = 0;
 			Switch_load3(0);
 		}
 ///////////////////////////////////////////////////////////////////
-
-//////////////CHECK WIND & PV CAPACITY////////////////////////////
-
-	init_adc2(2);
-	read_adc();
-	value = ADC;
-	wind_capacity = 3.3*(value/1024);
-
-	init_adc2(3);
-	read_adc();
-	value = ADC;
-	pv_capacity = 3.3*(value/1024);
-
-	available_supply = wind_capacity + pv_capacity;
 
 	if(Call == 1)
 	{
@@ -297,12 +300,29 @@ for(;;)
 		pwm_duty(0);
 		available_supply = available_supply;
 	}
-	
+	   
+/////CHECK THERE IS SUFFICENT SUPPLY FOR LOADS////
+	 if(required_supply > available_supply)
+	{
+		Switch_load3(0);
+		required_supply = required_supply - 1.4;
+		if(required_supply > available_supply)
+		{
+			Switch_load2(0);
+			required_supply = required_supply - 1.8;
+			if(required_supply > available_supply)
+			{
+				Switch_load1(0);
+				required_supply = required_supply - 0.8;
+			}
+		}
+	}
+	else
+	{
+	}
 //////////////////////////////////////////////////////////////////////
 
-	_delay_ms(5);
-	time = time + 0.005;
-//}
+}
 	return 1;
 }
 ////////digital outputs///////////
