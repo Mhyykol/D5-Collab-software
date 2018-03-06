@@ -197,10 +197,12 @@ for(;;)
 			if(Call_3 == 1)
 			{
 				required_supply = required_supply + 1.4;
+				pictorDrawD(4, (point){,}, CYAN, BLACK, Mash, 4, 1);
 			}
 			else if(Call_3 == 0)
 			{
 				required_supply = required_supply;
+				pictorDrawD(2.6, (point){,}, CYAN, BLACK, Mash, 4, 1);
 			}
 		}
 		else if(Call_2 == 0)
@@ -209,10 +211,12 @@ for(;;)
 			if(Call_3 == 1)
 			{
 				required_supply = required_supply + 1.4;
+				pictorDrawD(2.2, (point){,}, CYAN, BLACK, Mash, 4, 1);
 			}
 			else if(Call_3 == 0)
 			{
-				required_supply = required_supply;	
+				required_supply = required_supply;
+				pictorDrawD(0.8, (point){,}, CYAN, BLACK, Mash, 4, 1);
 			}
 		}
 	}
@@ -225,10 +229,12 @@ for(;;)
 				if(Call_3 == 1)
 				{
 					required_supply = required_supply + 1.4;
+					pictorDrawD(3.2, (point){,}, CYAN, BLACK, Mash, 4, 1);
 				}
 				else if(Call_3 == 0)
 				{
-						required_supply = required_supply;
+					required_supply = required_supply;
+					pictorDrawD(1.8, (point){,}, CYAN, BLACK, Mash, 4, 1);
 				}
 			}
 		else if(Call_2 == 0)
@@ -237,10 +243,12 @@ for(;;)
 				if(Call_3 == 1)
 				{
 					required_supply = 1.4;
+					pictorDrawD(1.4, (point){,}, CYAN, BLACK, Mash, 4, 1);
 				}
 				else if(Call_3 == 0)
 				{
 					required_supply = 0;
+					pictorDrawD(0, (point){,}, CYAN, BLACK, Mash, 4, 1);
 				}
 			}
 	}
