@@ -91,7 +91,6 @@ int main() {
 	int Call_2;
 	int Call_3;
 	int Flag;
-	double time;
 
 ////////////////////Left Section statics/////////////////////////
 //Draw value boxes
@@ -153,7 +152,7 @@ for(;;)
 	pv_capacity = 3.3*(value/1024);
 
 	available_supply = wind_capacity + pv_capacity;
-	
+	pictorDrawD(available_supply, (point){5,53},PALE CYAN, BLACK, Mash, 3, 2);
 	
 ////////////Check for load calls/////////////////////////////////
 	
