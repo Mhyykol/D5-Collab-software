@@ -135,8 +135,11 @@ for(;;)
 	busbar_current = ADCREF_V*(value/1024);
 
 	power = busbar_current * busbar_voltage;
+	total = total + power;
 	pictorDrawD(power, (point){5,53},PALE CYAN, BLACK, Mash, 3, 2);
 	pictorDrawS("W", (point){56,60}, MAGENTA, BLACK, Mash,2);
+	pictorDrawD(total, (point){5,56},PALE CYAN, BLACK, Mash, 3, 2);
+	pictorDrawS("W", (point){56,63}, MAGENTA, BLACK, Mash,2);
 /////////////////////////////////////////////////////////////////
 
 //////////////CHECK WIND & PV CAPACITY////////////////////////////
@@ -152,7 +155,7 @@ for(;;)
 	pv_capacity = 3.3*(value/1024);
 
 	available_supply = wind_capacity + pv_capacity;
-	pictorDrawD(available_supply, (point){5,53},PALE CYAN, BLACK, Mash, 3, 2);
+	pictorDrawD(available_supply, (point){5,59},PALE CYAN, BLACK, Mash, 3, 2);
 	
 ////////////Check for load calls/////////////////////////////////
 	
