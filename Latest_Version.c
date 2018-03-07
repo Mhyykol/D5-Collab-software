@@ -58,9 +58,9 @@ uint16_t read_adc(void);
 //this means that it is only in the code once, rather than once for every time it is used
 
 int main() {
-	DDRB |= _BV(PB7);
-	pictorInit(0);
-	PORTB |= _BV(PB7);
+	//DDRB |= _BV(PB7);
+	//pictorInit(0);
+	//PORTB |= _BV(PB7);
 	pictorSetRotation(1);
 	pictorDrawAll(BLACK);
 
