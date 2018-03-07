@@ -36,7 +36,7 @@
 #include <math.h>
 #include <avr/interrupt.h>
 #include <stdio.h>
-#include <time.h>
+//#include <time.h>
 
 #define PWM_DUTY_MAX 255
 #define ADCMAXREAD   1023
@@ -83,6 +83,7 @@ int main() {
 	double busbar_voltage;
 	double busbar_current;
 	double power;
+	double total;
 	double wind_capacity;
 	double pv_capacity;
 	double available_supply;
@@ -127,12 +128,12 @@ for(;;)
 	init_adc2(0);
 	read_adc();
 	value = ADC;
-	busbar_voltage = 100*ADCREF_V*(value/1024);
+	busbar_voltage = 100*(value/1024);
 
 	init_adc2(1);
 	read_adc();
 	value = ADC;
-	busbar_current = ADCREF_V*(value/1024);
+	busbar_current = 3*(value/1024);
 
 	power = busbar_current * busbar_voltage;
 	total = total + power;
@@ -147,19 +148,19 @@ for(;;)
 	init_adc2(2);
 	read_adc();
 	value = ADC;
-	wind_capacity = 3.3*(value/1024);
+	wind_capacity = (value/1024);
 
 	init_adc2(3);
 	read_adc();
 	value = ADC;
-	pv_capacity = 3.3*(value/1024);
+	pv_capacity = (value/1024);
 
 	available_supply = wind_capacity + pv_capacity;
 	pictorDrawD(available_supply, (point){5,59},PALE CYAN, BLACK, Mash, 3, 2);
 	
 ////////////Check for load calls/////////////////////////////////
 	
-	if((PINA & (1<<PA4))
+	if(PINA & (1<<PA4))
 		{
 			Call = 1;
 			Switch_load1(1);
@@ -195,19 +196,19 @@ for(;;)
 
 	if(Call == 1)
 	{
-		required_supply = 0.8;
+		required_supply = 8;
 		if(Call_2 == 1)
 		{
-			required_supply = required_supply + 1.8;
+			required_supply = required_supply + 18;
 			if(Call_3 == 1)
 			{
-				required_supply = required_supply + 1.4;
-				pictorDrawD(4, (point){,}, CYAN, BLACK, Mash, 4, 1);
+				required_supply = required_supply + 14;
+				//pictorDrawD(4, (point){,}, CYAN, BLACK, Mash, 4, 1);
 			}
 			else if(Call_3 == 0)
 			{
 				required_supply = required_supply;
-				pictorDrawD(2.6, (point){,}, CYAN, BLACK, Mash, 4, 1);
+				//pictorDrawD(2.6, (point){,}, CYAN, BLACK, Mash, 4, 1);
 			}
 		}
 		else if(Call_2 == 0)
@@ -215,13 +216,13 @@ for(;;)
 			required_supply = required_supply;
 			if(Call_3 == 1)
 			{
-				required_supply = required_supply + 1.4;
-				pictorDrawD(2.2, (point){,}, CYAN, BLACK, Mash, 4, 1);
+				required_supply = required_supply + 14;
+				//pictorDrawD(2.2, (point){,}, CYAN, BLACK, Mash, 4, 1);
 			}
 			else if(Call_3 == 0)
 			{
 				required_supply = required_supply;
-				pictorDrawD(0.8, (point){,}, CYAN, BLACK, Mash, 4, 1);
+				//pictorDrawD(0.8, (point){,}, CYAN, BLACK, Mash, 4, 1);
 			}
 		}
 	}
@@ -230,16 +231,16 @@ for(;;)
 		required_supply = 0;
 		if(Call_2 == 1)
 			{
-				required_supply = 1.8;
+				required_supply = 18;
 				if(Call_3 == 1)
 				{
-					required_supply = required_supply + 1.4;
-					pictorDrawD(3.2, (point){,}, CYAN, BLACK, Mash, 4, 1);
+					required_supply = required_supply + 14;
+					//pictorDrawD(3.2, (point){,}, CYAN, BLACK, Mash, 4, 1);
 				}
 				else if(Call_3 == 0)
 				{
 					required_supply = required_supply;
-					pictorDrawD(1.8, (point){,}, CYAN, BLACK, Mash, 4, 1);
+					//pictorDrawD(1.8, (point){,}, CYAN, BLACK, Mash, 4, 1);
 				}
 			}
 		else if(Call_2 == 0)
@@ -247,13 +248,13 @@ for(;;)
 				required_supply = 0;
 				if(Call_3 == 1)
 				{
-					required_supply = 1.4;
-					pictorDrawD(1.4, (point){,}, CYAN, BLACK, Mash, 4, 1);
+					required_supply = 14;
+					//pictorDrawD(1.4, (point){,}, CYAN, BLACK, Mash, 4, 1);
 				}
 				else if(Call_3 == 0)
 				{
 					required_supply = 0;
-					pictorDrawD(0, (point){,}, CYAN, BLACK, Mash, 4, 1);
+					//pictorDrawD(0, (point){,}, CYAN, BLACK, Mash, 4, 1);
 				}
 			}
 	}
@@ -270,19 +271,19 @@ for(;;)
 	*/
 	
 	
-	if((required_supply > available_supply) && (Flag > 1000))
+	if(required_supply > available_supply) //&& (Flag > 1000))
 	{
 		Switch_Char_Battery(0);
 		Switch_Dis_Battery(1);
-		available_supply = available_supply + 1;
+		available_supply = available_supply + 10;
 		Flag = Flag - 1;
 	}
-	else if(required_supply < (available_supply - 1))
+	else if((available_supply - 1) > required_supply)//< (available_supply - 1))
 	{
 		Switch_Dis_Battery(0);
 		Switch_Char_Battery(1);
 		Flag = Flag + 1;
-		available_supply = available_supply - 1;
+		available_supply = available_supply - 10;
 	}
 	else
 	{
@@ -294,16 +295,16 @@ for(;;)
 ///////////SUPPLY MAINS IF REQURED//////////////////////////
 	if(required_supply > available_supply)
 	{
-		pwm_duty(PWM_DUTY_MAX);
-		available_supply = available_supply + 3;
+		//pwm_duty(200);
+		available_supply = available_supply + 30;
 	}
 	else
 	{
-		pwm_duty(0);
+		//pwm_duty(0);
 		available_supply = available_supply;
 	}
 	   
-/////CHECK THERE IS SUFFICENT SUPPLY FOR LOADS////
+/*////CHECK THERE IS SUFFICENT SUPPLY FOR LOADS////
 	 if(required_supply > available_supply)
 	{
 		Switch_load3(0);
@@ -321,7 +322,7 @@ for(;;)
 	}
 	else
 	{
-	}
+	}*/
 //////////////////////////////////////////////////////////////////////
 
 }
