@@ -41,6 +41,7 @@
 #define PWM_DUTY_MAX 255
 #define ADCMAXREAD   1023
 #define ADCREF_V     3.3
+#define testnumber 400
 void Switch_Char_Battery(const uint8_t State);
 void Switch_Dis_Battery(const uint8_t State);
 void Switch_load1(const uint8_t State);
@@ -48,9 +49,16 @@ void Switch_load2(const uint8_t State);
 void Switch_load3(const uint8_t State);
 void init_pwm(void);
 void pwm_duty(uint8_t x);
-void init_adc (void);
-void init_adc2 (const uint8_t State);
-uint16_t read_adc(void);
+void init_adc(int channel);
+float pv_capacity(void);
+float wind_capacity(void);
+float battery_capacity(void);
+float power(void);
+float bus_current(void);
+float bus_voltage(void);
+int read_adc(void);
+int display_float(float x);
+float map(float x, float in_max, float out_max);
 
 
 //this text is stored entirely in program memory, useful for long strings that won't change
@@ -59,7 +67,7 @@ uint16_t read_adc(void);
 
 int main() {
 	//DDRB |= _BV(PB7);
-	//pictorInit(0);
+	pictorInit(0);
 	//PORTB |= _BV(PB7);
 	pictorSetRotation(1);
 	pictorDrawAll(BLACK);
@@ -77,89 +85,81 @@ int main() {
 
 //LED PIN/////
 	PORTD |= (1<<PD5);
-	
+
 //Variable Declarations//
 	uint16_t value;
-	double busbar_voltage;
-	double busbar_current;
-	double power;
-	double total;
-	double wind_capacity;
-	double pv_capacity;
-	double available_supply;
-	double required_supply;
+	float busbar_voltage;
+	float busbar_current;
+	float power;
+	float total;
+	float wind_capacity;
+	float pv_capacity;
+	float available_supply;
+	float required_supply;
 	int Call;
 	int Call_2;
 	int Call_3;
 	int Flag;
 
-////////////////////Left Section statics/////////////////////////
-//Draw value boxes
-	pictorDrawBox((point){2, 50}, (point){105, 78}, CYAN);
-	pictorDrawBox((point){4, 52}, (point){103, 76}, BLACK);
-	pictorDrawD(5000, (point){5,53},PALE CYAN, BLACK, Mash, 3, 4);
-	pictorDrawS("W", (point){68,60}, MAGENTA, BLACK, Mash,1);
-//Middle Section statics
-	pictorDrawLine((point){239, 0}, (point){239, 240}, CYAN);
-	pictorDrawS("MICRO-GRID", (point){55,0},WHITE, BLACK, Mash,1);
-	pictorDrawS("SMART METER", (point){55,8},WHITE, BLACK, Mash,2);
-	pictorDrawS("Current Mains Usage", (point){85,30},CYAN, BLACK, Mash,1);
-////////////////////Right Section statics//////////////////////////////////////
-	pictorDrawBox((point){239,0}, (point){320,240}, CYAN);
-	pictorDrawS("ACTIVE", (point){260,0},YELLOW, BLACK, OryxB, 1 );
-	pictorDrawS("LOADS", (point){263,8}, YELLOW, BLACK, OryxB, 1);
-	//smart texts, possibly to be written in another functions
-		pictorDrawD(1, (point){250,53}, BLACK, CYAN, Mash, 4, 1);
-		pictorDrawD(2, (point){250,101}, BLACK, CYAN, Mash, 4, 1);
-		pictorDrawD(3, (point){250,149}, BLACK, CYAN, Mash, 4, 1);
-		pictorDrawCircle((point){298,69}, 5, GREEN);
-		pictorDrawCircle((point){298,117}, 5, GREEN);
-		pictorDrawCircle((point){298,165}, 5, GREEN);
+	////////////////////Left Section statics/////////////////////////
+	//Draw value boxes
+		pictorDrawBox((point){2, 50}, (point){77, 78}, CYAN);
+		pictorDrawBox((point){4, 52}, (point){75, 76}, BLACK);
 
-	pictorDrawS("Last Modified:", (point){0, 231}, MAGENTA, BLACK, Mash,1);
-	pictorDrawS(__TIMESTAMP__, (point){120, 231}, MAGENTA, BLACK, Mash,1);
-	//PORTB &= ~_BV(PB7);
+		pictorDrawBox((point){2, 80}, (point){77, 108}, CYAN);
+		pictorDrawBox((point){4, 82}, (point){75, 106}, BLACK);
 
-for(;;)
+		pictorDrawBox((point){2, 110}, (point){77, 138}, CYAN);
+		pictorDrawBox((point){4, 112}, (point){75, 136}, BLACK);
+	//Middle Section statics
+		pictorDrawLine((point){249, 0}, (point){249, 240}, CYAN);
+		pictorDrawS("MICRO-GRID", (point){55,0},WHITE, BLACK, Mash,1);
+		pictorDrawS("SMART METER", (point){55,8},WHITE, BLACK, Mash,2);
+		pictorDrawS("Current Mains Usage", (point){85,30},CYAN, BLACK, Mash,1);
+	////////////////////Right Section statics//////////////////////////////////////
+		pictorDrawS("ACTIVE", (point){260,0},YELLOW, BLACK, OryxB, 1 );
+		pictorDrawS("LOADS", (point){263,8}, YELLOW, BLACK, OryxB, 1);
+		//smart texts, possibly to be written in another functions (copy purposes)
+			pictorDrawD(1, (point){300,53}, BLACK, BLACK, Mash, 4, 1);
+
+		//pictorDrawS("Last Modified:", (point){0, 231}, MAGENTA, BLACK, Mash,1);
+		//pictorDrawS(__TIMESTAMP__, (point){120, 231}, MAGENTA, BLACK, Mash,1);
+		//PORTB &= ~_BV(PB7);
+
+
+while (1)
 {
-//////////////READ BUSBAR CURRENT AND VOLTAGE VALUES///////////////
-	
+//////////////////draw boxes////////////////////////////////////////
+//////////////mains A//////////////
+pictorDrawD(display_float(1.16), (point){5,53},PALE CYAN, BLACK, Mash, 3, 2);
+pictorDrawBox((point){25, 71}, (point){27,73}, MAGENTA);
+pictorDrawS("W", (point){56,60}, MAGENTA, BLACK, Mash,2);
 
-	init_adc2(0);
-	read_adc();
-	value = ADC;
-	busbar_voltage = 100*(value/1024);
+/////////////solar A////////////////
+pictorDrawD(display_float(pv_capacity()), (point){5,83},PALE CYAN, BLACK, Mash, 3, 2);
+pictorDrawBox((point){26, 101}, (point){28,103}, MAGENTA);
+pictorDrawS("W", (point){56,90}, MAGENTA, BLACK, Mash,2);
 
-	init_adc2(1);
-	read_adc();
-	value = ADC;
-	busbar_current = 3*(value/1024);
+////////////wind A ////////////////
+pictorDrawD(display_float(wind_capacity()), (point){5,113},PALE CYAN, BLACK, Mash, 3, 2);
+pictorDrawBox((point){26, 131}, (point){28,133}, MAGENTA);
+pictorDrawS("W", (point){56,120}, MAGENTA, BLACK, Mash,2);
 
-	power = busbar_current * busbar_voltage;
-	total = total + power;
-	pictorDrawD(power, (point){5,53},PALE CYAN, BLACK, Mash, 3, 2);
-	pictorDrawS("W", (point){56,60}, MAGENTA, BLACK, Mash,2);
-	pictorDrawD(total, (point){5,56},PALE CYAN, BLACK, Mash, 3, 2);
-	pictorDrawS("W", (point){56,63}, MAGENTA, BLACK, Mash,2);
+
+
+	pictorDrawD(display_float(power()), (point){5,53},PALE CYAN, BLACK, Mash, 3, 2);
+	pictorDrawS("A", (point){56,60}, MAGENTA, BLACK, Mash,2);
+	pictorDrawD(display_float(available()), (point){5,56},PALE CYAN, BLACK, Mash, 3, 2);
+	pictorDrawS("A", (point){56,63}, MAGENTA, BLACK, Mash,2);
 /////////////////////////////////////////////////////////////////
 
 //////////////CHECK WIND & PV CAPACITY////////////////////////////
 
-	init_adc2(2);
-	read_adc();
-	value = ADC;
-	wind_capacity = (value/1024);
 
-	init_adc2(3);
-	read_adc();
-	value = ADC;
-	pv_capacity = (value/1024);
+	pictorDrawD(display_float(available()), (point){5,59},PALE CYAN, BLACK, Mash, 3, 2);
 
-	available_supply = wind_capacity + pv_capacity;
-	pictorDrawD(available_supply, (point){5,59},PALE CYAN, BLACK, Mash, 3, 2);
-	
 ////////////Check for load calls/////////////////////////////////
-	
+
 	if(PINA & (1<<PA4))
 		{
 			Call = 1;
@@ -192,8 +192,7 @@ for(;;)
 		    	Call_3 = 0;
 			Switch_load3(0);
 		}
-///////////////////////////////////////////////////////////////////
-
+///////////////how much juice do we need ///////////////////
 	if(Call == 1)
 	{
 		required_supply = 8;
@@ -258,7 +257,7 @@ for(;;)
 				}
 			}
 	}
-	
+
 //////////DISCHARGE/CHARGE BATTERY IF REQUIRED///////////////////
 	/*
 		do{
@@ -267,10 +266,10 @@ for(;;)
 			available_supply = available_supply + 1;
 			Flag = Flag - 1;
 		} while ((required_supply > available_supply) && (Flag > 0))
-	
+
 	*/
-	
-	
+
+
 	if(required_supply > available_supply) //&& (Flag > 1000))
 	{
 		Switch_Char_Battery(0);
@@ -291,7 +290,7 @@ for(;;)
 		Switch_Char_Battery(0);
 		available_supply = available_supply;
 	}
-	
+
 ///////////SUPPLY MAINS IF REQURED//////////////////////////
 	if(required_supply > available_supply)
 	{
@@ -303,7 +302,7 @@ for(;;)
 		//pwm_duty(0);
 		available_supply = available_supply;
 	}
-	   
+
 /*////CHECK THERE IS SUFFICENT SUPPLY FOR LOADS////
 	 if(required_supply > available_supply)
 	{
@@ -360,12 +359,12 @@ void Switch_load1(const uint8_t State)
 	if (State == 0)
 	{
 		PORTD &= ~_BV(2);
-		pictorDrawD(1, (point){250,53}, BLACK, BLACK, Mash, 4, 1);
+		pictorDrawD(1, (point){265,53}, BLACK, BLACK, Mash, 4, 1);
 	}
 	if (State == 1)
 	{
 		PORTD |= _BV(2);
-		pictorDrawD(1, (point){250,53}, CYAN, BLACK, Mash, 4, 1);
+		pictorDrawD(1, (point){265,53}, CYAN, BLACK, Mash, 4, 1);
 	}
 }
 
@@ -374,12 +373,12 @@ void Switch_load2(const uint8_t State)
 	if (State == 0)
 	{
 		PORTD &= ~_BV(3);
-		pictorDrawD(2, (point){250,101}, BLACK, BLACK, Mash, 4, 1);
+		pictorDrawD(2, (point){265,101}, BLACK, BLACK, Mash, 4, 1);
 	}
 	if (State == 1)
 	{
 		PORTD |= _BV(3);
-		pictorDrawD(2, (point){250,101}, CYAN, BLACK, Mash, 4, 1);
+		pictorDrawD(2, (point){265,101}, CYAN, BLACK, Mash, 4, 1);
 	}
 }
 
@@ -388,15 +387,15 @@ void Switch_load3(const uint8_t State)
 	if (State == 0)
 	{
 		PORTD &= ~_BV(4);
-		pictorDrawD(3, (point){250,149}, BLACK, BLACK, Mash, 4, 1);
+		pictorDrawD(3, (point){265,149}, BLACK, BLACK, Mash, 4, 1);
 	}
 	if (State == 1)
 	{
 		PORTD |= _BV(4);
-		pictorDrawD(3, (point){250,149}, CYAN, BLACK, Mash, 4, 1);
+		pictorDrawD(3, (point){265,149}, CYAN, BLACK, Mash, 4, 1);
 	}
 }
-	
+
 ///////// Analogue output to testbed ////////////////
 void init_pwm(void)
 {
@@ -411,131 +410,89 @@ void init_pwm(void)
     TCCR2B = _BV(CS20);   /* no prescaling */
 }
 
-void pwm_duty(uint8_t x)
+int display_float(float x)
+{
+	int i;
+	float d;
+	int dec;
+	i = (int)x;
+	d = x - i;
+	d = d * 10;
+	dec = round(d);
+	int value;
+	value = (i*10) + dec;
+	return value;
+}
+
+void pwm_duty(int x)
 {
     x = x > PWM_DUTY_MAX ? PWM_DUTY_MAX : x;
     OCR2A = x;
 }
 
-/*
-ISR(TIMER1_COMPA_vect)
-{
-	v_error = SETPOINT_V - v_load();
-
-		if (control == 1)
-		{
-			if (v_load() < SETPOINT_V )
-				{
-					SET_PWM ++;
-					if (SET_PWM == 246)
-					{
-						SET_PWM = 245;
-
-
-					}
-					pwm_duty(SET_PWM);  // Limited by PWM_DUTY_MAX
-				}
-			else
-				{
-					SET_PWM --;
-					if (SET_PWM == 0)
-					{
-						SET_PWM = 1;
-					}
-					pwm_duty(SET_PWM);
-				}
-		}
-		else
-		{
-				float iMax = 50;
-				float iMin = 0;
-
-				float P_Term;
-				float I_Term;
-				float D_Term;
-				int new_ADC_value;
-				float PWM_Duty;
-
-				new_ADC_value = v_load();
-
-				err_value = (SETPOINT_V - new_ADC_value);
-
-				i_Temp += err_value;
-
-				if (i_Temp > iMax)
-					{
-						i_Temp = iMax;
-					}
-
-				else if (i_Temp < iMin)
-					{
-						i_Temp = iMin;
-					}
-
-				P_Term = Kp * err_value;
-				I_Term = Ki * i_Temp;
-				D_Term = Kd * (d_Temp - err_value);
-				d_Temp = err_value;
-
-				PWM_Duty = PWM_Temp + (P_Term + I_Term + D_Term);
-
-				if (PWM_Duty > 250)
-				{
-					PWM_Duty = 245;
-				}
-				else if (PWM_Duty < 0)
-				{
-					PWM_Duty = 0;
-				}
-				pwm_duty(PWM_Duty);
-
-				PWM_Temp = PWM_Duty;
-
-		}
-
-				/*if(v_error <= 0.2) // If the difference of voltage is significant - set the LED high
-						{
-						PORTB |= _BV(7);
-						adjusting = 0;
-						}
-
-					else // If not, then low
-					{
-
-					PORTB &= !_BV(7);
-					adjusting = 1;
-					}*/
-
 ////////////Analogue input from testbed//////////
-void init_adc (void)
-{
-    /* REFSx = 0 : Select AREF as reference
-     * ADLAR = 0 : Right shift result
-     *  MUXx = 0 : Default to channel 0
-     */
-    ADMUX = 0x0F;
-    /*  ADEN = 1 : Enable the ADC
-     * ADPS2 = 1 : Configure ADC prescaler
-     * ADPS1 = 1 : F_ADC = F_CPU / 64
-     * ADPS0 = 0 :       = 187.5 kHz
-     */
-    ADCSRA = _BV(ADEN) | _BV(ADPS2) | _BV(ADPS1);
-}
-
-void init_adc2 (const uint8_t State)
+void init_adc(int channel)
 {
 	/* TODO: Initialisation code */
-	ADCSRA |= _BV(ADPS2) | _BV(ADPS1); /* F_ADC = F_CPU/64 */
-	ADMUX = State; /* Select channel n, where n = State */
-	ADMUX |= _BV(REFS0); /* AVCC reference */
+	ADCSRA |= _BV(ADPS2) | _BV(ADPS1) | _BV(ADPS0); /* F_ADC = F_CPU/128 */
+	ADMUX = channel; /* Select channel n, where n = State */
+	ADMUX |= _BV(REFS0) | _BV(REFS1); /* AVCC reference */
 	ADMUX |= _BV(ADLAR); /* ADCH contains 8 MSBs */
 	ADCSRA |= _BV(ADEN); /* Enable ADC */
 }
 
-uint16_t read_adc(void)
+int read_adc(void)
 {
 	/* TODO: Acquisition code */
 	ADCSRA |= _BV(ADSC); /* Start Conversions */
 	while(ADCSRA & _BV(ADSC));
 	return ADC;
+}
+
+float pv_capacity(void)
+{
+	float load = 0;
+	init_adc(3);
+	load = (read_adc()/1024);
+	return load;
+}
+
+float wind_capacity(void)
+{
+	float load = 0;
+	init_adc(2);
+	load = (read_adc()/1024);
+	return load;
+}
+
+
+float bus_current(void)
+{
+	float load = 0;
+	init_adc(0);
+	load = read_adc()/1024;
+	return load;
+}
+
+
+float bus_voltage(void)
+{
+	float load = 0;
+	init_adc(1);
+	load = read_adc()/1024;
+	return load;
+}
+
+float available(void)
+{
+	float pv = 0;
+	float wind = 0;
+	float bat = 0;
+	float available1 = 0 ;
+	float mains = 0;
+	pv = pv_capacity();
+	wind = wind_capacity();
+	bat = battery_capacity();
+	available1 = pv + wind;
+	return available1;
 }
