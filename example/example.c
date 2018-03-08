@@ -1,4 +1,4 @@
-//* example.c
+/* example.c
  *
  *  Author: Mishsael Oguntimehin
  *   Notes:
@@ -28,9 +28,9 @@
 #define PICTOR_FASTMODE
 #include <avr/io.h>
 
-#include "pictor.h"
-#include "OryxB.h"
-#include "Mash.h"
+#include "../pictor.h"
+#include "../fonts/OryxB.h"
+#include "../fonts/Mash.h"
 //#include "plug.h"
 #include <util/delay.h>
 #include <math.h>
@@ -48,7 +48,7 @@ void Switch_load1(const uint8_t State);
 void Switch_load2(const uint8_t State);
 void Switch_load3(const uint8_t State);
 void init_pwm(void);
-void pwm_duty(uint8_t x);
+void pwm_duty(int x);
 void init_adc(int channel);
 float pv_capacity(void);
 float wind_capacity(void);
@@ -56,6 +56,7 @@ float battery_capacity(void);
 float power(void);
 float bus_current(void);
 float bus_voltage(void);
+float available(void);
 int read_adc(void);
 int display_float(float x);
 float map(float x, float in_max, float out_max);
@@ -407,7 +408,7 @@ void init_pwm(void)
     TCCR2A = _BV(WGM20) | /* fast PWM/MAX */
 	     _BV(WGM21) | /* fast PWM/MAX */
 	     _BV(COM2A1); /* A output */
-    TCCR2B = _BV(CS20);   /* no prescaling */
+    TCCR2B = _BV(CS21);   /*16 prescaler */
 }
 
 int display_float(float x)
