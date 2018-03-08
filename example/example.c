@@ -42,11 +42,11 @@
 #define ADCMAXREAD   1023
 #define ADCREF_V     3.3
 #define testnumber 400
-void Switch_Char_Battery(const uint8_t State);
-void Switch_Dis_Battery(const uint8_t State);
-void Switch_load1(const uint8_t State);
-void Switch_load2(const uint8_t State);
-void Switch_load3(const uint8_t State);
+void Switch_Char_Battery(const int State);
+void Switch_Dis_Battery(const int State);
+void Switch_load1(const int State);
+void Switch_load2(const int State);
+void Switch_load3(const int State);
 void init_pwm(void);
 void pwm_duty(int x);
 void init_adc(int channel);
@@ -72,6 +72,7 @@ int main() {
 	//PORTB |= _BV(PB7);
 	pictorSetRotation(1);
 	pictorDrawAll(BLACK);
+	int bat_capacity=0;
 
 //SET PORT A FOR Inputs, pins 0-6 inputs, pin 7 output so doesnt affect system
 	DDRA = 0x00;
@@ -322,13 +323,13 @@ pictorDrawS("W", (point){56,120}, MAGENTA, BLACK, Mash,2);
 	{
 	}*/
 //////////////////////////////////////////////////////////////////////
-pwm_duty(150);
+pwm_duty(100);
 }
 	return 1;
 }
 ////////digital outputs///////////
 
-void Switch_Char_Battery(const uint8_t State)
+void Switch_Char_Battery(const int State)
 {
 	if (State == 0)
 	{
@@ -340,7 +341,7 @@ void Switch_Char_Battery(const uint8_t State)
 	}
 }
 
-void Switch_Dis_Battery(const uint8_t State)
+void Switch_Dis_Battery(const int State)
 {
 	if (State == 0)
 	{
@@ -353,7 +354,7 @@ void Switch_Dis_Battery(const uint8_t State)
 }
 
 
-void Switch_load1(const uint8_t State)
+void Switch_load1(const int State)
 {
 	if (State == 0)
 	{
@@ -367,7 +368,7 @@ void Switch_load1(const uint8_t State)
 	}
 }
 
-void Switch_load2(const uint8_t State)
+void Switch_load2(const int State)
 {
 	if (State == 0)
 	{
@@ -381,7 +382,7 @@ void Switch_load2(const uint8_t State)
 	}
 }
 
-void Switch_load3(const uint8_t State)
+void Switch_load3(const int State)
 {
 	if (State == 0)
 	{
@@ -406,7 +407,7 @@ void init_pwm(void)
     TCCR2A = _BV(WGM20) | /* fast PWM/MAX */
 	     _BV(WGM21) | /* fast PWM/MAX */
 	     _BV(COM2A1); /* A output */
-    TCCR2B = _BV(CS21) | _BV(CS20);   /*128 prescaler */
+    TCCR2B =  _BV(CS21);   /*8 prescaler */
 }
 
 int display_float(float x)
@@ -482,9 +483,15 @@ float bus_voltage(void)
 	return load;
 }
 
-int battery_capacity(void)
+int battery_capacity(int charge)
 {
-  return 1; // temp
+  if (charge > 1)
+		bat_capacity = bat_capacity + 1;
+	else if (charge < -1)
+		bat_capacity = bat_capacity - 1;
+
+	return bat_capacity;
+	 	// temp
 }
 
 float power(void)
