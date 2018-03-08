@@ -52,7 +52,7 @@ void pwm_duty(int x);
 void init_adc(int channel);
 float pv_capacity(void);
 float wind_capacity(void);
-float battery_capacity(void);
+int battery_capacity(void);
 float power(void);
 float bus_current(void);
 float bus_voltage(void);
@@ -88,19 +88,17 @@ int main() {
 	PORTD |= (1<<PD5);
 
 //Variable Declarations//
-	uint16_t value;
-	float busbar_voltage;
-	float busbar_current;
-	float power;
+	int value;
 	float total;
-	float wind_capacity;
-	float pv_capacity;
 	float available_supply;
 	float required_supply;
 	int Call;
 	int Call_2;
 	int Call_3;
 	int Flag;
+  Switch_load1(0);
+  Switch_load2(0);
+  Switch_load3(0);
 
 	////////////////////Left Section statics/////////////////////////
 	//Draw value boxes
@@ -324,7 +322,7 @@ pictorDrawS("W", (point){56,120}, MAGENTA, BLACK, Mash,2);
 	{
 	}*/
 //////////////////////////////////////////////////////////////////////
-
+pwm_duty(150);
 }
 	return 1;
 }
@@ -408,7 +406,7 @@ void init_pwm(void)
     TCCR2A = _BV(WGM20) | /* fast PWM/MAX */
 	     _BV(WGM21) | /* fast PWM/MAX */
 	     _BV(COM2A1); /* A output */
-    TCCR2B = _BV(CS21);   /*16 prescaler */
+    TCCR2B = _BV(CS21);   /*128 prescaler */
 }
 
 int display_float(float x)
@@ -427,7 +425,7 @@ int display_float(float x)
 
 void pwm_duty(int x)
 {
-    x = x > PWM_DUTY_MAX ? PWM_DUTY_MAX : x;
+  //  x = x > PWM_DUTY_MAX ? PWM_DUTY_MAX : x;
     OCR2A = x;
 }
 
@@ -482,6 +480,16 @@ float bus_voltage(void)
 	init_adc(1);
 	load = read_adc()/1024;
 	return load;
+}
+
+int battery_capacity(void)
+{
+  return 1; // temp
+}
+
+float power(void)
+{
+  return bus_current()*bus_voltage();
 }
 
 float available(void)
