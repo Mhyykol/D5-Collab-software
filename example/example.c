@@ -406,7 +406,7 @@ void init_pwm(void)
     TCCR2A = _BV(WGM20) | /* fast PWM/MAX */
 	     _BV(WGM21) | /* fast PWM/MAX */
 	     _BV(COM2A1); /* A output */
-    TCCR2B = _BV(CS21);   /*128 prescaler */
+    TCCR2B = _BV(CS21) | _BV(CS20);   /*128 prescaler */
 }
 
 int display_float(float x)
