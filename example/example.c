@@ -453,7 +453,7 @@ float pv_capacity(void)
 {
 	float load = 0;
 	init_adc(3);
-	load = (read_adc()/1024);
+	load = (read_adc()/1023);
 	return load;
 }
 
@@ -461,7 +461,7 @@ float wind_capacity(void)
 {
 	float load = 0;
 	init_adc(2);
-	load = (read_adc()/1024);
+	load = (read_adc()/1023);
 	return load;
 }
 
@@ -470,7 +470,7 @@ float bus_current(void)
 {
 	float load = 0;
 	init_adc(0);
-	load = read_adc()/1024;
+	load = read_adc()/1023;
 	return load;
 }
 
@@ -479,7 +479,7 @@ float bus_voltage(void)
 {
 	float load = 0;
 	init_adc(1);
-	load = read_adc()/1024;
+	load = read_adc()/1023;
 	return load;
 }
 
