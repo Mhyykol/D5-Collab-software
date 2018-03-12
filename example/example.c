@@ -108,12 +108,24 @@ int main() {
 	//Draw value boxes
 		pictorDrawBox((point){2, 50}, (point){77, 78}, CYAN);
 		pictorDrawBox((point){4, 52}, (point){75, 76}, BLACK);
+		pictorDrawS("Current Power Usage", (point){79,60},CYAN, BLACK, Mash,1);
 
 		pictorDrawBox((point){2, 80}, (point){77, 108}, CYAN);
 		pictorDrawBox((point){4, 82}, (point){75, 106}, BLACK);
+		pictorDrawS("Total Power Usage", (point){79,90},CYAN, BLACK, Mash,1);
 
 		pictorDrawBox((point){2, 110}, (point){77, 138}, CYAN);
 		pictorDrawBox((point){4, 112}, (point){75, 136}, BLACK);
+		pictorDrawS("Mains Capacity", (point){79,120},CYAN, BLACK, Mash,1);
+
+		pictorDrawBox((point){2, 140}, (point){77, 168}, CYAN);
+		pictorDrawBox((point){4, 142}, (point){75, 166}, BLACK);
+		pictorDrawS("Wind Capacity", (point){79,150},CYAN, BLACK, Mash,1);
+
+		pictorDrawBox((point){2, 170}, (point){77, 198}, CYAN);
+		pictorDrawBox((point){4, 172}, (point){75, 196}, BLACK);
+		pictorDrawS("Solar Capacity", (point){79,180},CYAN, BLACK, Mash,1);
+
 	//Middle Section statics
 		pictorDrawLine((point){249, 0}, (point){249, 240}, CYAN);
 		pictorDrawS("MICRO-GRID", (point){0,0},CYAN, BLACK, Mash,1);
@@ -142,12 +154,12 @@ pictorDrawS("W", (point){56,60}, MAGENTA, BLACK, Mash,2);
 /////////////solar A////////////////
 pictorDrawD(display_float(pv_capacity()), (point){5,83},PALE CYAN, BLACK, Mash, 3, 2);
 pictorDrawBox((point){26, 101}, (point){28,103}, MAGENTA);
-pictorDrawS("W", (point){56,90}, MAGENTA, BLACK, Mash,2);
+pictorDrawS("A", (point){56,90}, MAGENTA, BLACK, Mash,2);
 
 ////////////wind A ////////////////
 pictorDrawD(display_float(wind_capacity()), (point){5,113},PALE CYAN, BLACK, Mash, 3, 2);
 pictorDrawBox((point){26, 131}, (point){28,133}, MAGENTA);
-pictorDrawS("W", (point){56,120}, MAGENTA, BLACK, Mash,2);
+pictorDrawS("A", (point){56,120}, MAGENTA, BLACK, Mash,2);
 
 
 //////////////////// total power /////////////////////////////////////
@@ -160,15 +172,13 @@ pictorDrawS("W", (point){56,120}, MAGENTA, BLACK, Mash,2);
 	3, 2);
 	pictorDrawS("A", (point){56,180}, MAGENTA, BLACK, Mash,2);
 /////////////////////////////////////////////////////////////////
-	pictorDrawD(display_float(1.5), (point){263,204}, CYAN, BLACK, Mash, 2, 2);
+	pictorDrawD(display_float(required_supply), (point){263,204}, CYAN, BLACK, Mash, 2, 2);
 	pictorDrawBox((point){277, 210}, (point){279,212}, MAGENTA);
 	pictorDrawS("A", (point){300,204}, MAGENTA, BLACK, Mash,2);
 
 
 //////////////CHECK WIND & PV CAPACITY////////////////////////////
 
-
-	pictorDrawD(display_float(available()), (point){5,223},PALE CYAN, BLACK, Mash, 3, 2);
 
 ////////////Check for load calls/////////////////////////////////
 
