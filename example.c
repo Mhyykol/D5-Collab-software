@@ -1,6 +1,6 @@
 /* example.c
  *
- *  Author: Mishsael Oguntimehin
+ *  Authors: Mishael Oguntimehin, Liam Caddy, Paul Wrona
  *   Notes:
  *
  *          - Pin assignment:
@@ -13,8 +13,6 @@
  *            | A    | PA4 | Call For Load 1             |
  *            | A    | PA5 | Call For Load 2             |
  *            | A    | PA6 | Call For Load 3             |
-
-
  *            | D    | PD0 | Charge battery call         |
  *            | D    | PD1 | Discharge battery call      |
  *            | D    | PD2 | Switch load 1               |
@@ -66,7 +64,7 @@ int mains_capacity(void);
 int charge = 0;
 int discharge = 0;
 int mains = 0;
-int check = 0; 
+int check = 0;
 
 //this text is stored entirely in program memory, useful for long strings that won't change
 //it is also useful if the same string is used many times in the code, to declare the string once at the beginning rather than every time it is used
@@ -95,7 +93,7 @@ int main() {
 
 //Variable Declarations//
 	int value;
-	float total;
+	float total = 0;
 	float available_supply;
 	float required_supply = 0;
 	int Call;
@@ -110,20 +108,34 @@ int main() {
 	//Draw value boxes
 		pictorDrawBox((point){2, 50}, (point){77, 78}, CYAN);
 		pictorDrawBox((point){4, 52}, (point){75, 76}, BLACK);
+		pictorDrawS("Current Power Usage", (point){79,60},CYAN, BLACK, Mash,1);
 
 		pictorDrawBox((point){2, 80}, (point){77, 108}, CYAN);
 		pictorDrawBox((point){4, 82}, (point){75, 106}, BLACK);
+		pictorDrawS("Total Power Usage", (point){79,90},CYAN, BLACK, Mash,1);
 
 		pictorDrawBox((point){2, 110}, (point){77, 138}, CYAN);
 		pictorDrawBox((point){4, 112}, (point){75, 136}, BLACK);
+		pictorDrawS("Mains Capacity", (point){79,120},CYAN, BLACK, Mash,1);
+
+		pictorDrawBox((point){2, 140}, (point){77, 168}, CYAN);
+		pictorDrawBox((point){4, 142}, (point){75, 166}, BLACK);
+		pictorDrawS("Wind Capacity", (point){79,150},CYAN, BLACK, Mash,1);
+
+		pictorDrawBox((point){2, 170}, (point){77, 198}, CYAN);
+		pictorDrawBox((point){4, 172}, (point){75, 196}, BLACK);
+		pictorDrawS("Solar Capacity", (point){79,180},CYAN, BLACK, Mash,1);
+
 	//Middle Section statics
 		pictorDrawLine((point){249, 0}, (point){249, 240}, CYAN);
-		pictorDrawS("MICRO-GRID", (point){55,0},WHITE, BLACK, Mash,1);
-		pictorDrawS("SMART METER", (point){55,8},WHITE, BLACK, Mash,2);
+		pictorDrawS("MICRO-GRID", (point){0,0},CYAN, BLACK, Mash,1);
+		pictorDrawS("SMART METER", (point){0,8},WHITE, BLACK, Mash,2);
 		pictorDrawS("Current Mains Usage", (point){85,30},CYAN, BLACK, Mash,1);
 	////////////////////Right Section statics//////////////////////////////////////
 		pictorDrawS("ACTIVE", (point){260,0},YELLOW, BLACK, OryxB, 1 );
 		pictorDrawS("LOADS", (point){263,8}, YELLOW, BLACK, OryxB, 1);
+		pictorDrawS("Total", (point){263,185}, YELLOW, BLACK, OryxB, 1);
+		pictorDrawS("Demand", (point){263,193}, WHITE, BLACK, OryxB, 1);
 		//smart texts, possibly to be written in another functions (copy purposes)
 			pictorDrawD(1, (point){300,53}, BLACK, BLACK, Mash, 4, 1);
 
@@ -135,34 +147,41 @@ int main() {
 while (1)
 {
 //////////////////draw boxes////////////////////////////////////////
-//////////////mains A//////////////
-pictorDrawD(display_float(1.16), (point){5,53},PALE CYAN, BLACK, Mash, 3, 2);
+pictorDrawD(display_float(power()), (point){5,53},PALE CYAN, BLACK, Mash, 3, 2);
 pictorDrawBox((point){25, 71}, (point){27,73}, MAGENTA);
 pictorDrawS("W", (point){56,60}, MAGENTA, BLACK, Mash,2);
 
 /////////////solar A////////////////
 pictorDrawD(display_float(pv_capacity()), (point){5,83},PALE CYAN, BLACK, Mash, 3, 2);
 pictorDrawBox((point){26, 101}, (point){28,103}, MAGENTA);
-pictorDrawS("W", (point){56,90}, MAGENTA, BLACK, Mash,2);
+pictorDrawS("A", (point){56,90}, MAGENTA, BLACK, Mash,2);
 
 ////////////wind A ////////////////
 pictorDrawD(display_float(wind_capacity()), (point){5,113},PALE CYAN, BLACK, Mash, 3, 2);
 pictorDrawBox((point){26, 131}, (point){28,133}, MAGENTA);
-pictorDrawS("W", (point){56,120}, MAGENTA, BLACK, Mash,2);
+pictorDrawS("A", (point){56,120}, MAGENTA, BLACK, Mash,2);
 
 
-
-	pictorDrawD(display_float(power()), (point){5,53},PALE CYAN, BLACK, Mash, 3, 2);
-	pictorDrawS("A", (point){56,60}, MAGENTA, BLACK, Mash,2);
-	pictorDrawD(display_float(available()), (point){5,56},PALE CYAN, BLACK, Mash, 3, 2);
-	pictorDrawS("A", (point){56,63}, MAGENTA, BLACK, Mash,2);
+//////////////////// total power /////////////////////////////////////
+	pictorDrawD(display_float(power()), (point){5,143},PALE CYAN, BLACK, Mash, 3, 2);
+	pictorDrawBox((point){26, 161}, (point){28,163}, MAGENTA);
+	pictorDrawS("A", (point){56,150}, MAGENTA, BLACK, Mash,2);
+	
+	total = total + power();
+/////////////////available Capacity ///////////////////////////////
+	pictorDrawBox((point){26, 191}, (point){28,193}, MAGENTA);
+	pictorDrawD(display_float(available()), (point){5,173},PALE CYAN, BLACK, Mash,
+	3, 2);
+	pictorDrawS("A", (point){56,180}, MAGENTA, BLACK, Mash,2);
 /////////////////////////////////////////////////////////////////
+	pictorDrawD(display_float(required_supply), (point){263,204}, CYAN, BLACK, Mash, 2, 2);
+	pictorDrawBox((point){277, 210}, (point){279,212}, MAGENTA);
+	pictorDrawS("A", (point){300,204}, MAGENTA, BLACK, Mash,2);
+
 
 //////////////CHECK WIND & PV CAPACITY////////////////////////////
 
 
-	pictorDrawD(display_float(available()), (point){5,59},PALE CYAN, BLACK, Mash, 3, 2);
-	
 ////////////Check for load calls/////////////////////////////////
 
 	if(PINA & (1<<PA4))
@@ -263,17 +282,28 @@ pictorDrawS("W", (point){56,120}, MAGENTA, BLACK, Mash,2);
 				}
 			}
 	}
-	
-	
+
+
 	check = 3;
+	if(available() >= required_supply + 1)
+		{
+			//charge battery
+			Switch_Char_Battery(1);
+
+		}
+	else if(required_supply > available())
+		{
+			Switch_Char_Battery(0);
+			required_supply = required_supply - 1;
+		}
 	
 	if(PINA & (1<<PA6) && (available() >= required_supply))
 		{
 			//Call_3 = 1;
 			Switch_load3(1);
-			
+
 		}
-	else if(required_supply > available())
+	else if(PINA & (1<<PA6) && (required_supply > available()))
 		{
 			Switch_load3(0);
 			required_supply = required_supply - 1.4;
@@ -289,7 +319,7 @@ pictorDrawS("W", (point){56,120}, MAGENTA, BLACK, Mash,2);
 			//Call_2 = 1;
 			Switch_load2(1);
 		}
-	else if(required_supply > available())
+	else if(PINA & (1<<PA5) && (required_supply > available()))
 		{
 			Switch_load2(0);
 			required_supply = required_supply - 1.8;
@@ -305,7 +335,7 @@ pictorDrawS("W", (point){56,120}, MAGENTA, BLACK, Mash,2);
 			//Call = 1;
 			Switch_load1(1);
 		}
-	else if(required_supply > available())
+	else if(PINA & (1<<PA4) && (required_supply > available()))
 		{
 			Switch_load1(0);
 			required_supply = required_supply - 0.8;
@@ -315,7 +345,7 @@ pictorDrawS("W", (point){56,120}, MAGENTA, BLACK, Mash,2);
 		    //Call = 0;
 			Switch_load1(0);
 		}
-	
+
 	if(Call == 1)
 	{
 		required_supply = 0.8;
@@ -379,8 +409,8 @@ pictorDrawS("W", (point){56,120}, MAGENTA, BLACK, Mash,2);
 					//pictorDrawD(0, (point){,}, CYAN, BLACK, Mash, 4, 1);
 				}
 			}
-	}	
-		
+	}
+
 	/*if(required_supply > available())
 	{
 		Switch_load3(0);
@@ -406,7 +436,6 @@ pictorDrawS("W", (point){56,120}, MAGENTA, BLACK, Mash,2);
 			available_supply = available_supply + 1;
 			Flag = Flag - 1;
 		} while ((required_supply > available_supply) && (Flag > 0))
-
 	*/
 
 	check = 1;
@@ -434,20 +463,33 @@ pictorDrawS("W", (point){56,120}, MAGENTA, BLACK, Mash,2);
 		discharge = 0;
 	}
 
-//////////SUPPLY MAINS IF REQURED//////////////////////////	
+//////////SUPPLY MAINS IF REQURED//////////////////////////
 	check = 2;
 	if(required_supply > available())
 	{
-		//pwm_duty(200);
+		pwm_duty(80);
 		mains = 1;
-		//Switch_load1(1);
+		check = 3;
+		if(required_supply > available())
+		{
+			pwm_duty(160);
+			mains = 2;
+			//Switch_load1(1);
+		}		
+			if(required_supply > available())
+			{
+				pwm_duty(255);
+				mains = 3;
+			//Switch_load1(1);
+			}		
 	}
 	else
 	{
-		//pwm_duty(0);
+	    pwm_duty(0);
 		mains = 0;
-		//Switch_load1(0);
 	}
+
+	
 
 /*//CHECK THERE IS SUFFICENT SUPPLY FOR LOADS////
 	check = 3;
@@ -470,7 +512,7 @@ pictorDrawS("W", (point){56,120}, MAGENTA, BLACK, Mash,2);
 	{
 	}*/
 //////////////////////////////////////////////////////////////////////
-pwm_duty(150);
+//pwm_duty(150);
 }
 	return 1;
 }
@@ -642,7 +684,7 @@ float available(void)
 	float bat = 0;
 	float mai = 0;
 	float available1 = 0 ;
-	
+
 	if (check == 1)
 	{
 		pv = pv_capacity();
@@ -661,9 +703,9 @@ float available(void)
 		bat = battery_capacity();
 		mai = mains_capacity();
 	}
-	
-	available1 = ((pv + wind)*0.25) + bat + mai;
-	
+
+	available1 = ((pv + wind)*0.12) + bat + mai;
+
 	/*if (required_supply > available1)
 	{
 		mains = mains_supply();
@@ -695,7 +737,15 @@ int mains_capacity(void)
 	float load = 0;
 	if(mains == 1)
 	{
-		load = 3;
+		load = 0.8;
+	}
+	else if(mains == 2)
+	{
+		load = 1.4;
+	}
+	else if(mains == 3)
+	{
+		load = 2;
 	}
 	else
 	{
@@ -703,3 +753,93 @@ int mains_capacity(void)
 	}
 	return load;
 }
+
+/* Power provided by source
+
+power_share_pv = 0;
+power_share_wind = 0;
+power_share_mains = 0;
+tot_power_pv = 0;
+tot_power_wind = 0;
+tot_power_mains = 0;
+total_power = 0;
+total_cost = 0;
+cost_saved = 0;
+
+tot_power_pv = tot_power_pv + (bus_voltage()*pv_capacity);
+tot_power_wind = tot_power_wind + (bus_voltage()*wind_capacity);
+tot_power_mains = tot_power_mains + (bus_voltage()*mains_capacity);
+total_power = total_power + power();
+
+power_share_pv = (tot_power_pv/total_power)*100;
+power_share_wind = (tot_power_wind/total_power)*100;
+power_share_mains = (tot_power_mains/total_power)*100;
+
+total_cost = (tot_power_mains/24000)*0.1437;
+cost_saved = ((tot_power_pv + tot_power_wind)/24000)*0.1437;
+
+uk electricity cost = 14.37p / kwh
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
